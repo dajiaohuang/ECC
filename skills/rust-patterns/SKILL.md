@@ -332,18 +332,16 @@ for msg in rx {
 ### Async with Tokio
 
 ```rust
+use anyhow::{Context, Result};
 use tokio::time::Duration;
 
 async fn fetch_with_timeout(url: &str) -> Result<String> {
-    let response = tokio::time::timeout(
-        Duration::from_secs(5),
-        reqwest::get(url),
-    )
+    tokio::time::timeout(Duration::from_secs(5), async {
+        let response = reqwest::get(url).await.context("request failed")?;
+        response.text().await.context("failed to read body")
+    })
     .await
     .context("request timed out")?
-    .context("request failed")?;
-
-    response.text().await.context("failed to read body")
 }
 
 // Spawn concurrent tasks
