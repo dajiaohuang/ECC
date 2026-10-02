@@ -6,22 +6,22 @@ origin: ECC
 
 # Next.jsとTurbopack
 
-Next.js 16+はローカル開発にデフォルトでTurbopackを使用する。TurbopackはRustで書かれたインクリメンタルバンドラーで、開発起動時間とホットアップデートを大幅に高速化する。
+Next.js 16+はローカル開発と本番ビルドの両方でデフォルトでTurbopackを使用する。Rustで書かれたインクリメンタルバンドラーである。
 
 ## 使用するタイミング
 
 - **Turbopack（デフォルト開発）**: 日々の開発に使用する。特に大規模アプリでコールドスタートとHMRが速い。
-- **Webpack（レガシー開発）**: Turbopackのバグに遭遇した場合、またはwebpackのみのプラグインに依存している場合のみ使用する。`--webpack`（またはNext.jsのバージョンによっては`--no-turbopack`）で無効化する。リリースのドキュメントを確認すること。
-- **プロダクション**: プロダクションビルドの動作（`next build`）はNext.jsのバージョンによってTurbopackまたはwebpackを使用することがある。使用中のバージョンの公式Next.jsドキュメントを確認すること。
+- **Webpackへの切り替え**: webpackとの互換性が必要な場合は`next dev --webpack`または`next build --webpack`を使用する。
+- **プロダクション**: Next.js 16+の`next build`はデフォルトでTurbopackを使用する。`--webpack`でwebpackに切り替える。
 
 使用するケース: Next.js 16+アプリの開発またはデバッグ、開発起動やHMRの遅延を診断するとき、またはプロダクションバンドルを最適化するとき。
 
 ## 仕組み
 
-- **Turbopack**: Next.js開発用インクリメンタルバンドラー。ファイルシステムキャッシングを使用するため再起動が大幅に速くなる（大規模プロジェクトで5〜14倍など）。
-- **開発のデフォルト**: Next.js 16から、`next dev`は無効化しない限りTurbopackで実行される。
-- **ファイルシステムキャッシング**: 再起動は前回の作業を再利用する。キャッシュは通常`.next`以下にある。基本的な使用には追加設定は不要。
-- **バンドルアナライザー（Next.js 16.1+）**: 実験的なバンドルアナライザーで出力を検査し重い依存関係を見つける。設定または実験的フラグで有効化する（使用中のバージョンのNext.jsドキュメントを参照）。
+- **Turbopack**: Next.jsの開発と本番ビルド用インクリメンタルバンドラー。
+- **デフォルトバンドラー**: Next.js 16から、`next dev`と`next build`の両方がデフォルトでTurbopackを使用する。
+- **ファイルシステムキャッシング**: Next.js 16.0の開発キャッシュはベータ版で、`experimental.turbopackFileSystemCacheForDev: true`が必要。16.1からは開発キャッシュが安定版になり、デフォルトで有効。これらのバージョン条件は開発キャッシュに関するもので、本番ビルドのキャッシュには適用しない。
+- **バンドルアナライザー（Next.js 16.1+）**: `next experimental-analyze`でバンドルと重い依存関係を検査する。このコマンドはアプリケーションのビルドを生成しない。
 
 ## 例
 
@@ -42,3 +42,5 @@ next start
 - 安定したTurbopackとキャッシングの動作のために最新のNext.js 16.xを使い続ける。
 - 開発が遅い場合は、Turbopack（デフォルト）を使用していることと、キャッシュが不必要にクリアされていないことを確認する。
 - プロダクションバンドルサイズの問題には、使用中のバージョンの公式Next.jsバンドル解析ツールを使用する。
+
+References: [Next.js 16](https://nextjs.org/blog/next-16), [Next.js 16.1](https://nextjs.org/blog/next-16-1), [Next.js CLI](https://nextjs.org/docs/app/api-reference/cli/next).
